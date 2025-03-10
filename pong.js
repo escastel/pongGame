@@ -10,7 +10,7 @@ let game = function() {
 
 	function	start(){
 		init()
-		controlGame = setInterval(player1, time)
+		controlGame = setInterval(play, time)
 	}
 
 	function	init(){
@@ -34,18 +34,40 @@ let game = function() {
 	}
 
 	function	moverPaddle(){
-		
+		if (player1.keyPress){
+			if (player1.keyCode == 38)
+				paddleLeft.style.top = (paddleLeft.offsetTop - movePaddle) + "px"
+			if (player1.keyCode == 40)
+				paddleLeft.style.top = (paddleLeft.offsetTop + movePaddle) + "px"
+		}
+		if (player2.keyPress){
+			if (player1.keyCode == 87)
+				paddleLeft.style.top = (paddleLeft.offsetTop - movePaddle) + "px"
+			if (player1.keyCode == 83)
+				paddleLeft.style.top = (paddleLeft.offsetTop + movePaddle) + "px"
+		}
 	}
 	
 	document.onkeydown = function(e){
 		e = e
 		switch(e.keyCode){
-			case 
+			case 38: // Flecha para arriba
+			case 40:   // Flecha para abajo 
+				player1.keyCode = e.keyCode
+				player1.keyPress = true   
+			case 83:  // Tecla S 83
+			case 87: // Tecla W 87
+				player2.keyCode = e.keyCode
+				player2.keyPress = true
+			break
 		}
 	}
 
 	document.onkeyup = function(e){
-
+		if (e.keyCode == 38 || e.keyCode == 40)
+			player1.keyPress = false
+		if (e.keyCode == 83 || e.keyCode == 87)
+			player2.keyPress = false
 	}
 	start()
 }
