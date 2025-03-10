@@ -1,0 +1,33 @@
+body {
+	background-color: black;
+}
+#ball {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	left: 10px;
+	top: 0px;
+	background-color: white;
+	border-radius: 20px;
+}
+.paddle {
+	width: 20px;
+	height: 100px;
+	top: 20px;
+	position: absolute;
+	background-color: white;
+	margin: 5px;
+}
+#paddleLeft {
+	float: left;
+}
+#paddleRight {
+	float: right;
+	right: 5px;
+}
+#line {
+	width: 50%;
+	height: 100%;
+	border-right: 5px dashed white;
+	position: absolute;
+}
