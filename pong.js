@@ -1,9 +1,9 @@
-let game = function() {
+var game = function() {
 	let	time = 30 // Tiempo de iteracion
-	let move = 20 // Movimiento de la pelota
+	let movement = 20 // Movimiento de la pelota
 	let	movePaddle = 20 // Movimiento de las palas
-	let	width = document.documentElement.clientWidth - move // Colisiones
-	let height =  document.documentElement.clientHeight - move // Colisiones
+	let	width = document.documentElement.clientWidth - movement // Colisiones
+	let height =  document.documentElement.clientHeight - movement // Colisiones
 	let controlGame
 	let player1
 	let player2
@@ -28,46 +28,88 @@ let game = function() {
 	function	stop(){
 		clearInterval(controlGame);
 		document.body.style.background = "red"
-	}
+	} 
+
 	function	play(){
+		moverBall()
 		moverPaddle()
+	}
+
+	function	moverBall(){
+		checkState()
+		switch(ball.state){
+			case 1: // Derecha, Abajo
+				ball.style.left = (ball.offsetLeft + movement) + "px"
+				ball.style.top = (ball.offsetTop + movement) + "px"
+				break
+			case 2: // Derecha, Arriba
+				ball.style.left = (ball.offsetLeft + movement) + "px"
+				ball.style.top = (ball.offsetTop - movement) + "px"
+				break
+			case 3: // Izquierda, Abajo
+				ball.style.left = (ball.offsetLeft - movement) + "px"
+				ball.style.top = (ball.offsetTop + movement) + "px"
+				break
+			case 4: // Izquierda, Arriba
+				ball.style.left = (ball.offsetLeft - movement) + "px"
+				ball.style.top = (ball.offsetTop - movement) + "px"
+				break
+		}
+	}
+
+	function	checkState(){
+		if (ball.direction === 1){
+			if (ball.offsetTop >= height) ball.state = 2
+			else if (ball.offsetTop <= 0) ball.state = 1
+		}
+	}
+
+	function	collidePLayer1(){
+		return false
+	}
+
+	function	collidePLayer2(){
+		return false
 	}
 
 	function	moverPaddle(){
 		if (player1.keyPress){
-			if (player1.keyCode == 38)
+			if ((player1.keyCode == "W" || player1.keyCode == "w") && paddleLeft.offsetTop >= 15)
 				paddleLeft.style.top = (paddleLeft.offsetTop - movePaddle) + "px"
-			if (player1.keyCode == 40)
+			if ((player1.keyCode == "S" || player1.keyCode == "s") && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
 				paddleLeft.style.top = (paddleLeft.offsetTop + movePaddle) + "px"
 		}
 		if (player2.keyPress){
-			if (player1.keyCode == 87)
-				paddleLeft.style.top = (paddleLeft.offsetTop - movePaddle) + "px"
-			if (player1.keyCode == 83)
-				paddleLeft.style.top = (paddleLeft.offsetTop + movePaddle) + "px"
+			if ((player2.keyCode == "ArrowUp") && paddleRight.offsetTop >= 15)
+				paddleRight.style.top = (paddleRight.offsetTop - movePaddle) + "px"
+			if ((player2.keyCode == "ArrowDown") && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
+				paddleRight.style.top = (paddleRight.offsetTop + movePaddle) + "px"
 		}
 	}
 	
 	document.onkeydown = function(e){
 		e = e
-		switch(e.keyCode){
-			case 38: // Flecha para arriba
-			case 40:   // Flecha para abajo 
-				player1.keyCode = e.keyCode
-				player1.keyPress = true   
-			case 83:  // Tecla S 83
-			case 87: // Tecla W 87
-				player2.keyCode = e.keyCode
+		switch(e.key){   
+			case "W":
+			case "w":
+			case "s":
+			case "S": 
+				player1.keyCode = e.key
+				player1.keyPress = true
+				break
+			case "ArrowUp":
+			case "ArrowDown": 
+				player2.keyCode = e.key
 				player2.keyPress = true
-			break
+				break
 		}
 	}
 
 	document.onkeyup = function(e){
-		if (e.keyCode == 38 || e.keyCode == 40)
+		if (e.key == "W" || e.key == "w" || e.key == "S" || e.key == "s")
 			player1.keyPress = false
-		if (e.keyCode == 83 || e.keyCode == 87)
+		if (e.key == "ArrowUp" || e.key == "ArrowDown")
 			player2.keyPress = false
 	}
 	start()
-}
+}()
