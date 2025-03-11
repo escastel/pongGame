@@ -1,5 +1,5 @@
 var game = function() {
-	let	time = 50 // Tiempo de iteracion
+	let	time = 40 // Tiempo de iteracion
 	let movement = 20 // Movimiento de la pelota
 	let	movePaddle = 20 // Movimiento de las palas
 	let	width = document.documentElement.clientWidth - movement // Colisiones
@@ -103,7 +103,7 @@ var game = function() {
 	}
 
 	function	collidePLayer2(){
-		if ((ball.offsetLeft <= (width - paddleRight.clientWidth)) && 
+		if ((ball.offsetLeft >= (width - paddleRight.clientWidth)) && 
 		(ball.offsetTop >= paddleRight.offsetTop) && 
 		(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
 			return true
