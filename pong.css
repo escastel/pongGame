@@ -1,5 +1,6 @@
 body, html {
 	height: 100%;
+	max-height: max-content;
 	background-color: black;
 	overflow: hidden;
 }
@@ -7,8 +8,8 @@ body, html {
 #ball {
 	width: 20px;
 	height: 20px;
-	left: 10px;
-	top: 10px;
+	left: 50%;
+	top: 50%;
 	position: absolute;
 	background-color: white;
 	border-radius: 20px;
@@ -17,7 +18,6 @@ body, html {
 .paddle {
 	width: 20px;
 	height: 100px;
-	top: 20px;
 	background-color: white;
 	position: absolute;
 }
@@ -33,5 +33,24 @@ body, html {
 #line {
 	width: 50%;
 	height: 100%;
-	border-right: 5px dashed white;
+	border-right: 10px dashed white;
+}
+
+.contador {
+	color: white;
+	position: absolute;
+	width: 500px;
+	height: 500px;
+	border: 3px solir white;
+	top: 10%;
+	font-size: 100px;
+	font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+#contador1 {
+	left: 25%;
+}
+
+#contador2 {
+	left: 75%;
 }

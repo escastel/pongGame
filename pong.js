@@ -1,12 +1,19 @@
 var game = function() {
-	let	time = 40 // Tiempo de iteracion
-	let movement = 20 // Movimiento de la pelota
+	let	time = 30 // Tiempo de iteracion
+	let movement = 10// Movimiento de la pelota
 	let	movePaddle = 20 // Movimiento de las palas
 	let	width = document.documentElement.clientWidth - movement // Colisiones
 	let height =  document.documentElement.clientHeight - movement // Colisiones
 	let controlGame
-	let player1
-	let player2
+	class Player {
+		constructor(){
+			this.keyPress = false
+			this.keyCode = null
+			this.contador = 0
+		}
+	}
+	let player1 = new Player()
+	let player2 = new Player()
 
 	function	start(){
 		init()
@@ -14,15 +21,12 @@ var game = function() {
 	}
 
 	function	init(){
-		ball.style.left = 0
+		ball.style.left = "50%"
+		ball.style.top = "50%"
 		ball.state = 1
 		ball.direction = 1  // right 1, left 2
-		player1 = new Object()
-		player2 = new Object()
-		player1.keyPress = false
-		player1.keyCode = null
-		player2.keyPress = false
-		player2.keyCode = null
+		paddleLeft.style.top = "50%"
+		paddleRight.style.top = "50%"
 	}
 
 	function	stop(){
@@ -38,12 +42,20 @@ var game = function() {
 
 	function checkLost(){
 		if (ball.offsetLeft >= width){
-			stop()
-			console.log("Punto para el player 1")
+			if(player1.contador < 9)
+				init()
+			else
+				stop()
+			player1.contador++
+			document.getElementById('contador1').innerHTML = player1.contador
 		}
 		if (ball.offsetLeft <= 0){
-			stop()
-			console.log("Punto para el player 2")
+			if(player2.contador < 9)
+				init()
+			else
+				stop()
+			player2.contador++
+			document.getElementById('contador2').innerHTML = player2.contador
 		}
 	}
 
@@ -76,6 +88,7 @@ var game = function() {
 				ball.state = 1
 			if (ball.state == 4)
 				ball.state = 2
+			movement = 15
 		}
 		else if (collidePLayer2()){
 			ball.direction = 2
@@ -83,6 +96,7 @@ var game = function() {
 				ball.state = 3
 			if (ball.state == 2)
 				ball.state = 4
+			movement = 15
 		}
 		if (ball.direction === 1){
 			if (ball.offsetTop >= height) ball.state = 2
@@ -112,15 +126,15 @@ var game = function() {
 
 	function	moverPaddle(){
 		if (player1.keyPress){
-			if ((player1.keyCode == "W" || player1.keyCode == "w") && paddleLeft.offsetTop >= 15)
+			if (player1.keyCode == "up" && paddleLeft.offsetTop >= 15)
 				paddleLeft.style.top = (paddleLeft.offsetTop - movePaddle) + "px"
-			if ((player1.keyCode == "S" || player1.keyCode == "s") && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
+			if (player1.keyCode == "down" && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
 				paddleLeft.style.top = (paddleLeft.offsetTop + movePaddle) + "px"
 		}
 		if (player2.keyPress){
-			if ((player2.keyCode == "ArrowUp") && paddleRight.offsetTop >= 15)
+			if (player2.keyCode == "up" && paddleRight.offsetTop >= 15)
 				paddleRight.style.top = (paddleRight.offsetTop - movePaddle) + "px"
-			if ((player2.keyCode == "ArrowDown") && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
+			if (player2.keyCode == "down" && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
 				paddleRight.style.top = (paddleRight.offsetTop + movePaddle) + "px"
 		}
 	}
@@ -130,14 +144,20 @@ var game = function() {
 		switch(e.key){   
 			case "W":
 			case "w":
+				player1.keyCode = "up"
+				player1.keyPress = true
+				break
 			case "s":
 			case "S": 
-				player1.keyCode = e.key
+				player1.keyCode = "down"
 				player1.keyPress = true
 				break
 			case "ArrowUp":
+				player2.keyCode = "up"
+				player2.keyPress = true
+				break
 			case "ArrowDown": 
-				player2.keyCode = e.key
+				player2.keyCode = "down"
 				player2.keyPress = true
 				break
 		}
