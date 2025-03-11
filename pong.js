@@ -1,5 +1,5 @@
 var game = function() {
-	let	time = 30 // Tiempo de iteracion
+	let	time = 50 // Tiempo de iteracion
 	let movement = 20 // Movimiento de la pelota
 	let	movePaddle = 20 // Movimiento de las palas
 	let	width = document.documentElement.clientWidth - movement // Colisiones
@@ -33,6 +33,18 @@ var game = function() {
 	function	play(){
 		moverBall()
 		moverPaddle()
+		checkLost()
+	}
+
+	function checkLost(){
+		if (ball.offsetLeft >= width){
+			stop()
+			console.log("Punto para el player 1")
+		}
+		if (ball.offsetLeft <= 0){
+			stop()
+			console.log("Punto para el player 2")
+		}
 	}
 
 	function	moverBall(){
@@ -58,17 +70,43 @@ var game = function() {
 	}
 
 	function	checkState(){
+		if (collidePLayer1()){
+			ball.direction = 1
+			if (ball.state == 3)
+				ball.state = 1
+			if (ball.state == 4)
+				ball.state = 2
+		}
+		else if (collidePLayer2()){
+			ball.direction = 2
+			if (ball.state == 1)
+				ball.state = 3
+			if (ball.state == 2)
+				ball.state = 4
+		}
 		if (ball.direction === 1){
 			if (ball.offsetTop >= height) ball.state = 2
 			else if (ball.offsetTop <= 0) ball.state = 1
 		}
+		else {
+			if (ball.offsetTop >= height) ball.state = 4
+			else if (ball.offsetTop <= 0) ball.state = 3
+		}
 	}
 
 	function	collidePLayer1(){
+		if ((ball.offsetLeft <= paddleLeft.clientWidth) && 
+		(ball.offsetTop >= paddleLeft.offsetTop) && 
+		(ball.offsetTop <= (paddleLeft.offsetTop + paddleLeft.clientHeight)))
+			return true
 		return false
 	}
 
 	function	collidePLayer2(){
+		if ((ball.offsetLeft <= (width - paddleRight.clientWidth)) && 
+		(ball.offsetTop >= paddleRight.offsetTop) && 
+		(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
+			return true
 		return false
 	}
 

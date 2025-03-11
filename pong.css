@@ -1,12 +1,14 @@
-body {
+body, html {
+	height: 100%;
 	background-color: black;
+	overflow: hidden;
 }
 #ball {
 	width: 20px;
 	height: 20px;
-	position: absolute;
 	left: 10px;
-	top: 0px;
+	top: 10px;
+	position: absolute;
 	background-color: white;
 	border-radius: 20px;
 }
@@ -14,20 +16,17 @@ body {
 	width: 20px;
 	height: 100px;
 	top: 20px;
-	position: absolute;
 	background-color: white;
-	margin: 5px;
+	position: absolute;
 }
 #paddleLeft {
 	float: left;
 }
 #paddleRight {
-	float: right;
 	right: 5px;
 }
 #line {
 	width: 50%;
 	height: 100%;
 	border-right: 5px dashed white;
-	position: absolute;
 }
