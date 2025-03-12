@@ -24,7 +24,7 @@ var game = function() {
 		resetBall()
 		takeDirection()
 	}
-	
+
 	function	resetBall(){
 		ball.style.left = "50%"
 		ball.style.top = Math.floor(Math.random() * (100 - 0)) + "%"
@@ -54,23 +54,31 @@ var game = function() {
 
 	function checkLost(){
 		if (ball.offsetLeft >= width){
-			player1.contador++
+			updateScore(1)
 			if(player1.contador < 10)
 				init()
 			else
 				stop()
-			document.getElementById('contador1').innerHTML = player1.contador
 		}
 		if (ball.offsetLeft <= 0){
-			player2.contador++
+			updateScore(2)
 			if(player2.contador < 10)
 				init()
 			else
 				stop()
-			document.getElementById('contador2').innerHTML = player2.contador
 		}
 	}
 
+	function	updateScore(player){
+		if (player == 1){
+			player1.contador++
+			document.getElementById('contador1').innerHTML = player1.contador
+		}
+		else {
+			player2.contador++
+			document.getElementById('contador2').innerHTML = player2.contador
+		}
+	}
 	function	moveBall(){
 		checkState()
 		switch(ball.state){
