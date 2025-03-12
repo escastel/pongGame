@@ -6,8 +6,8 @@ body, html {
 }
 
 #ball {
-	width: 3%;
-	height: 3%;
+	width: 2%;
+	height: 2.5%;
 	left: 50%;
 	top: 50%;
 	position: absolute;
@@ -15,8 +15,8 @@ body, html {
 }
 
 .paddle {
-	width: 20px;
-	height: 100px;
+	width: 2.5%;
+	height: 12.5%;
 	background-color: white;
 	position: absolute;
 	top: 50%;
@@ -39,7 +39,6 @@ body, html {
 .contador {
 	color: white;
 	position: absolute;
-	border: 3px solir white;
 	top: 10%;
 	font-size: 700%;
 	font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
