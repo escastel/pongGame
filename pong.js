@@ -5,7 +5,6 @@ var game = function() {
 	let	width = document.documentElement.clientWidth - movement // Colisiones
 	let height =  document.documentElement.clientHeight - movement // Colisiones
 	let controlGame
-	
 	class Player {
 		constructor(){
 			this.keyPress = false
@@ -17,16 +16,22 @@ var game = function() {
 	let player2 = new Player()
 
 	function	start(){
-/* 		paddleLeft.style.top = "50%"
-		paddleRight.style.top = "50%" */
 		init()
 		controlGame = setInterval(play, time)
 	}
 
 	function	init(){
+		resetBall()
+		takeDirection()
+	}
+	
+	function	resetBall(){
 		ball.style.left = "50%"
-		ball.style.top = "50%"
+		ball.style.top = Math.floor(Math.random() * (100 - 0)) + "%"
 		movement = 10
+	}
+
+	function	takeDirection(){
 		if ((player1.contador + player2.contador) % 2 == 0){
 			ball.state = Math.floor(Math.random() * (5 - 3) + 3)
 			ball.direction = "left"
@@ -35,12 +40,10 @@ var game = function() {
 			ball.state = Math.floor(Math.random() * (3 - 1) + 1)
 			ball.direction = "right"
 		}
-		/* console.log(ball.state) */
 	}
 
 	function	stop(){
 		clearInterval(controlGame);
-		document.body.style.background = "red"
 	} 
 
 	function	play(){
@@ -98,6 +101,7 @@ var game = function() {
 			if (ball.state == 4)
 				ball.state = 2
 			movement = 15
+			ball.style.left = (paddleLeft.offsetLeft + paddleLeft.clientWidth) + "px"
 		}
 		else if (collidePLayer2()){
 			ball.direction = "left"
@@ -106,6 +110,7 @@ var game = function() {
 			if (ball.state == 2)
 				ball.state = 4
 			movement = 15
+			ball.style.left = (paddleRight.offsetLeft - ball.clientWidth) + "px"
 		}
 		if (ball.direction === "right"){
 			if (ball.offsetTop >= height) ball.state = 2
@@ -118,7 +123,7 @@ var game = function() {
 	}
 
 	function	collidePLayer1(){
-		if ((ball.offsetLeft <= paddleLeft.clientWidth) && 
+		if ((ball.offsetLeft <= (paddleLeft.clientWidth + paddleLeft.offsetLeft)) && 
 		(ball.offsetTop >= paddleLeft.offsetTop) && 
 		(ball.offsetTop <= (paddleLeft.offsetTop + paddleLeft.clientHeight)))
 			return true
@@ -126,7 +131,7 @@ var game = function() {
 	}
 
 	function	collidePLayer2(){
-		if ((ball.offsetLeft >= (width - paddleRight.clientWidth)) && 
+		if ((ball.offsetLeft + ball.clientWidth >= (paddleRight.offsetLeft)) && 
 		(ball.offsetTop >= paddleRight.offsetTop) && 
 		(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
 			return true
@@ -176,5 +181,6 @@ var game = function() {
 		if (e.key == "ArrowUp" || e.key == "ArrowDown")
 			player2.keyPress = false
 	}
+
 	start()
 }()
