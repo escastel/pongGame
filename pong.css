@@ -1,13 +1,13 @@
 body, html {
 	height: 100%;
-/* 	max-height: max-content; */
+ 	max-height: max-content;
 	background-color: black;
 	overflow: hidden;
 }
 
 #ball {
-	width: 2%;
-	height: 2.5%;
+	width: 20px;
+	height: 20px;
 	left: 50%;
 	top: 50%;
 	position: absolute;
@@ -15,19 +15,20 @@ body, html {
 }
 
 .paddle {
-	width: 2.5%;
-	height: 12.5%;
+	width: 20px;
+	height: 120px;
 	background-color: white;
 	position: absolute;
 	top: 50%;
 }
 
 #paddleLeft {
-	left: 2%;
+/* 	left: 2%; */
 }
 
 #paddleRight {
-	right: 2%;
+/* 	right: 2%; */
+	right: 2px;
 }
 
 #line {
