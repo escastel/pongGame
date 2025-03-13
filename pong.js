@@ -33,7 +33,7 @@ var game = function() {
 
 	function	takeDirection(){
 		if ((player1.contador + player2.contador) % 2 == 0){
-			ball.state = Math.floor(Math.random() * (5 - 3) + 3)
+			ball.state = Math.floor(Math.random() * (6 - 4) + 4)
 			ball.direction = "left"
 		}
 		else {
@@ -90,34 +90,43 @@ var game = function() {
 				ball.style.left = (ball.offsetLeft + movement) + "px"
 				ball.style.top = (ball.offsetTop - movement) + "px"
 				break
-			case 3: // Izquierda, Abajo
+			case 3: // Derecha, Recto
+				ball.style.left = (ball.offsetLeft + movement) + "px"
+				break
+			case 4: // Izquierda, Abajo
 				ball.style.left = (ball.offsetLeft - movement) + "px"
 				ball.style.top = (ball.offsetTop + movement) + "px"
 				break
-			case 4: // Izquierda, Arriba
+			case 5: // Izquierda, Arriba
 				ball.style.left = (ball.offsetLeft - movement) + "px"
 				ball.style.top = (ball.offsetTop - movement) + "px"
 				break
+			case 6: // Izquierda, Recto
+				ball.style.left = (ball.offsetLeft - movement) + "px"
 		}
 	}
 
 	function	checkState(){
 		if (collidePLayer1()){
 			ball.direction = "right"
-			if (ball.state == 3)
-				ball.state = 1
 			if (ball.state == 4)
-				ball.state = 2
-			movement = 15
+				ball.state = 1 // Math.floor(Math.random() * (3 - 1) + 1)
+			if (ball.state == 5)
+				ball.state = 2 // Math.floor(Math.random() * (3 - 1) + 1)
+			/* if (ball.state = 6)
+				ball.state = Math.floor(Math.random() * (4 - 1) + 1) */
+			movement = 25
 			ball.style.left = (paddleLeft.offsetLeft + paddleLeft.clientWidth) + "px"
 		}
 		else if (collidePLayer2()){
 			ball.direction = "left"
 			if (ball.state == 1)
-				ball.state = 3
+				ball.state = 4 // Math.floor(Math.random() * (6 - 4) + 4)
 			if (ball.state == 2)
-				ball.state = 4
-			movement = 15
+				ball.state = 5 // Math.floor(Math.random() * (6 - 4) + 4)
+			/* if (ball.state = 3)
+				ball.state = Math.floor(Math.random() * (7 - 4) + 4) */
+			movement = 25
 			ball.style.left = (paddleRight.offsetLeft - ball.clientWidth) + "px"
 		}
 		if (ball.direction === "right"){
@@ -125,8 +134,8 @@ var game = function() {
 			else if (ball.offsetTop <= 0) ball.state = 1
 		}
 		else {
-			if (ball.offsetTop >= height) ball.state = 4
-			else if (ball.offsetTop <= 0) ball.state = 3
+			if (ball.offsetTop >= height) ball.state = 5
+			else if (ball.offsetTop <= 0) ball.state = 4
 		}
 	}
 
