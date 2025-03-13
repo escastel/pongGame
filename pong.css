@@ -50,7 +50,7 @@ body, html {
 	position: absolute;
 }
 
-.contador {
+.counter {
 	color: white;
 	position: absolute;
 	top: 10%;
@@ -58,10 +58,10 @@ body, html {
 	font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-#contador1 {
+#counter1 {
 	left: 25%;
 }
 
-#contador2 {
+#counter2 {
 	left: 65%;
 }
