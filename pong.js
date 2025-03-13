@@ -1,16 +1,22 @@
 var game = function() {
-	let	time = 30 // Tiempo de iteracion
-	let movement = 10// Movimiento de la pelota
-	let	paddle = 20 // Movimiento de las palas
-	let	width = document.documentElement.clientWidth - movement // Colisiones
-	let height =  document.documentElement.clientHeight - movement // Colisiones
+	let	time = 30
+	let speed = 25
+	let	paddleSpeed = 20
+	let	width = document.documentElement.clientWidth - speed
+	let height =  document.documentElement.clientHeight - speed 
 	let controlGame
+	let angle
 	class Player {
 		constructor(){
 			this.keyPress = false
 			this.keyCode = null
 			this.contador = 0
 		}
+	}
+	let	ballData = {
+		element: document.getElementById('ball'),
+		velX: 0,
+		velY: 0,
 	}
 	let player1 = new Player()
 	let player2 = new Player()
@@ -22,29 +28,7 @@ var game = function() {
 
 	function	init(){
 		resetBall()
-		takeDirection()
 	}
-
-	function	resetBall(){
-		ball.style.left = "50%"
-		ball.style.top = Math.floor(Math.random() * (100 - 0)) + "%"
-		movement = 10
-	}
-
-	function	takeDirection(){
-		if ((player1.contador + player2.contador) % 2 == 0){
-			ball.state = Math.floor(Math.random() * (6 - 4) + 4)
-			ball.direction = "left"
-		}
-		else {
-			ball.state = Math.floor(Math.random() * (3 - 1) + 1)
-			ball.direction = "right"
-		}
-	}
-
-	function	stop(){
-		clearInterval(controlGame);
-	} 
 
 	function	play(){
 		moveBall()
@@ -52,16 +36,33 @@ var game = function() {
 		checkLost()
 	}
 
+	function	stop(){
+		clearInterval(controlGame)
+	}
+
+	function	resetBall(){
+		ball.style.left = "50%"
+	 	ball.style.top = Math.floor(Math.random() * 100) + "%"
+		speed = 10
+		angle = (Math.random() * Math.PI / 2) - Math.PI / 4
+
+		if ((player1.contador + player2.contador) % 2 == 0)
+			ballData.velX = speed * Math.cos(angle) * -1
+		else
+			ballData.velX = speed * Math.cos(angle) * 1
+		ballData.velY = speed * Math.sin(angle)
+	}
+
 	function checkLost(){
 		if (ball.offsetLeft >= width){
-			updateScore(1)
+			updateScore(paddleLeft)
 			if(player1.contador < 10)
 				init()
 			else
 				stop()
 		}
 		if (ball.offsetLeft <= 0){
-			updateScore(2)
+			updateScore(paddleRight)
 			if(player2.contador < 10)
 				init()
 			else
@@ -69,8 +70,8 @@ var game = function() {
 		}
 	}
 
-	function	updateScore(player){
-		if (player == 1){
+	function	updateScore(paddle){
+		if (paddle == paddleLeft){
 			player1.contador++
 			document.getElementById('contador1').innerHTML = player1.contador
 		}
@@ -79,94 +80,72 @@ var game = function() {
 			document.getElementById('contador2').innerHTML = player2.contador
 		}
 	}
-	function	moveBall(){
+
+	function moveBall() {
 		checkState()
-		switch(ball.state){
-			case 1: // Derecha, Abajo
-				ball.style.left = (ball.offsetLeft + movement) + "px"
-				ball.style.top = (ball.offsetTop + movement) + "px"
-				break
-			case 2: // Derecha, Arriba
-				ball.style.left = (ball.offsetLeft + movement) + "px"
-				ball.style.top = (ball.offsetTop - movement) + "px"
-				break
-			case 3: // Derecha, Recto
-				ball.style.left = (ball.offsetLeft + movement) + "px"
-				break
-			case 4: // Izquierda, Abajo
-				ball.style.left = (ball.offsetLeft - movement) + "px"
-				ball.style.top = (ball.offsetTop + movement) + "px"
-				break
-			case 5: // Izquierda, Arriba
-				ball.style.left = (ball.offsetLeft - movement) + "px"
-				ball.style.top = (ball.offsetTop - movement) + "px"
-				break
-			case 6: // Izquierda, Recto
-				ball.style.left = (ball.offsetLeft - movement) + "px"
-		}
+		ball.style.left = (ball.offsetLeft + ballData.velX) + "px"
+		ball.style.top = (ball.offsetTop + ballData.velY) + "px"
+
+		if (ball.offsetTop <= 0 || ball.offsetTop >= height)
+			ballData.velY *= -1
 	}
 
-	function	checkState(){
-		if (collidePLayer1()){
-			ball.direction = "right"
-			if (ball.state == 4)
-				ball.state = 1 // Math.floor(Math.random() * (3 - 1) + 1)
-			if (ball.state == 5)
-				ball.state = 2 // Math.floor(Math.random() * (3 - 1) + 1)
-			/* if (ball.state = 6)
-				ball.state = Math.floor(Math.random() * (4 - 1) + 1) */
-			movement = 25
-			ball.style.left = (paddleLeft.offsetLeft + paddleLeft.clientWidth) + "px"
-		}
-		else if (collidePLayer2()){
-			ball.direction = "left"
-			if (ball.state == 1)
-				ball.state = 4 // Math.floor(Math.random() * (6 - 4) + 4)
-			if (ball.state == 2)
-				ball.state = 5 // Math.floor(Math.random() * (6 - 4) + 4)
-			/* if (ball.state = 3)
-				ball.state = Math.floor(Math.random() * (7 - 4) + 4) */
-			movement = 25
-			ball.style.left = (paddleRight.offsetLeft - ball.clientWidth) + "px"
-		}
-		if (ball.direction === "right"){
-			if (ball.offsetTop >= height) ball.state = 2
-			else if (ball.offsetTop <= 0) ball.state = 1
+	function checkState() {
+		if (collidePLayer(paddleLeft))
+			handlePaddleCollision(paddleLeft)
+		else if (collidePLayer(paddleRight))
+			handlePaddleCollision(paddleRight)
+	}
+
+	function	collidePLayer(paddle){
+		if (paddle == paddleLeft){
+			if ((ball.offsetLeft <= (paddleLeft.clientWidth + paddleLeft.offsetLeft)) && 
+			(ball.offsetTop >= paddleLeft.offsetTop) && 
+			(ball.offsetTop <= (paddleLeft.offsetTop + paddleLeft.clientHeight)))
+				return true
 		}
 		else {
-			if (ball.offsetTop >= height) ball.state = 5
-			else if (ball.offsetTop <= 0) ball.state = 4
+			if ((ball.offsetLeft + ball.clientWidth >= (paddleRight.offsetLeft)) && 
+			(ball.offsetTop >= paddleRight.offsetTop) && 
+			(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
+				return true
 		}
-	}
-
-	function	collidePLayer1(){
-		if ((ball.offsetLeft <= (paddleLeft.clientWidth + paddleLeft.offsetLeft)) && 
-		(ball.offsetTop >= paddleLeft.offsetTop) && 
-		(ball.offsetTop <= (paddleLeft.offsetTop + paddleLeft.clientHeight)))
-			return true
 		return false
 	}
 
-	function	collidePLayer2(){
-		if ((ball.offsetLeft + ball.clientWidth >= (paddleRight.offsetLeft)) && 
-		(ball.offsetTop >= paddleRight.offsetTop) && 
-		(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
-			return true
-		return false
+	function handlePaddleCollision(paddle) {
+		let paddleCenter = paddle.offsetTop + paddle.clientHeight / 2
+		let ballCenter = ball.offsetTop + ball.clientHeight / 2
+		let offset = (ballCenter - paddleCenter) / (paddle.clientHeight / 2)
+		let maxBounceAngle = Math.PI / 4
+		
+		speed = 25
+		angle = offset * maxBounceAngle
+		speed == Math.max(10, Math.sqrt(ballData.velX ** 2 + ballData.velY ** 2))
+	
+		let newVelX = speed * Math.cos(angle)
+		if (Math.abs(newVelX) < 2)
+			newVelX = newVelX > 0 ? 2 : -2
+		ballData.velX = newVelX * (ballData.velX > 0 ? -1 : 1)
+		ballData.velY = speed * Math.sin(angle)
+		
+		ball.style.left = (paddle === paddleLeft) 
+		? (paddle.offsetLeft + paddle.clientWidth) + "px"
+		: (paddle.offsetLeft - ball.clientWidth) + "px"
 	}
 
 	function	movePaddle(){
 		if (player1.keyPress){
 			if (player1.keyCode == "up" && paddleLeft.offsetTop >= 15)
-				paddleLeft.style.top = (paddleLeft.offsetTop - paddle) + "px"
+				paddleLeft.style.top = (paddleLeft.offsetTop - paddleSpeed) + "px"
 			if (player1.keyCode == "down" && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
-				paddleLeft.style.top = (paddleLeft.offsetTop + paddle) + "px"
+				paddleLeft.style.top = (paddleLeft.offsetTop + paddleSpeed) + "px"
 		}
 		if (player2.keyPress){
 			if (player2.keyCode == "up" && paddleRight.offsetTop >= 15)
-				paddleRight.style.top = (paddleRight.offsetTop - paddle) + "px"
+				paddleRight.style.top = (paddleRight.offsetTop - paddleSpeed) + "px"
 			if (player2.keyCode == "down" && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
-				paddleRight.style.top = (paddleRight.offsetTop + paddle) + "px"
+				paddleRight.style.top = (paddleRight.offsetTop + paddleSpeed) + "px"
 		}
 	}
 	
