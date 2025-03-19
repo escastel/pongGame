@@ -18,7 +18,7 @@ var game = function() {
 	let	ballData = {
 		element: document.getElementById('ball'),
 		velX: 0,
-		velY: 0,
+		velY: 0
 	}
 	let player1 = new Player()
 	let player2 = new Player()
@@ -26,7 +26,7 @@ var game = function() {
 	function	start(){
 		init()
 		controlGame = setInterval(play, time)
-		if (AIOpponent) controlAI = setInterval(moveAI, 10)
+		if (AIOpponent) controlAI = setInterval(moveAI, 1000)
 	}
 
 	function	init(){
@@ -90,7 +90,7 @@ var game = function() {
 		ball.style.left = (ball.offsetLeft + ballData.velX) + "px"
 		ball.style.top = (ball.offsetTop + ballData.velY) + "px"
 
-		if (ball.offsetTop <= 0 || ball.offsetTop >= height)
+	 	if (ball.offsetTop <= 0 || ball.offsetTop >= height)
 			ballData.velY *= -1
 	}
 
@@ -154,15 +154,26 @@ var game = function() {
 	}
 	
  	function moveAI(){
-		let aiPaddle = paddleRight
-		let paddleCenter = aiPaddle.offsetTop + aiPaddle.clientHeight / 2
-    	let ballCenter = ball.offsetTop + ball.clientHeight / 2
-		let aiSpeed = 10
-
-		if (ballCenter < paddleCenter - 10)
-			aiPaddle.style.top = (aiPaddle.offsetTop - aiSpeed) + "px"
-		else if (ballCenter > paddleCenter + 10)
-			aiPaddle.style.top = (aiPaddle.offsetTop + aiSpeed) + "px"
+/* 		let ballCenter = ball.offsetTop + ball.clientHeight / 2
+		let	paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2 */
+		let time = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX
+		let	futY = ball.offsetLeft + ballData.velY * time
+		if (ballData.velX > 0){
+			while(futY < 0 || futY > height){
+				if (futY < 0){
+					futY = 0
+				} else if (futY > height){
+					futY = height
+				}		let ballCenter = ball.offsetTop + ball.clientHeight / 2
+				let	paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2
+			}
+			if (futY < paddleRight.offsetTop){
+				paddleRight.style.top = futY + "px"
+			} 
+			if (futY > paddleRight.offsetTop){
+				paddleRight.style.top = futY + "px"
+			}
+		}
 	}
 
 	document.onkeydown = function(e){
