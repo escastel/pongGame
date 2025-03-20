@@ -22,11 +22,13 @@ var game = function() {
 	}
 	let player1 = new Player()
 	let player2 = new Player()
+	let targetY = 0
 
 	function	start(){
 		init()
 		controlGame = setInterval(play, time)
-		if (AIOpponent) controlAI = setInterval(moveAI, 1000)
+		if (AIOpponent) 
+			controlAI = setInterval(moveAI, 1000)
 	}
 
 	function	init(){
@@ -41,7 +43,8 @@ var game = function() {
 
 	function	stop(){
 		clearInterval(controlGame)
-		clearInterval(controlAI)
+		if (AIOpponent)
+			clearInterval(controlAI)
 	}
 
 	function	resetBall(){
@@ -145,7 +148,11 @@ var game = function() {
 			if (player1.keyCode == "down" && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
 				paddleLeft.style.top = (paddleLeft.offsetTop + paddleSpeed) + "px"
 		}
-		if (player2.keyPress && !AIOpponent){
+		if (player2.keyPress){
+			if (AIOpponent){
+				if ((targetY >= paddleRight.offsetTop) && (targetY <= (paddleRight.offsetTop + paddleRight.clientHeight)))
+					player2.keyPress = false
+			}
 			if (player2.keyCode == "up" && paddleRight.offsetTop >= 15)
 				paddleRight.style.top = (paddleRight.offsetTop - paddleSpeed) + "px"
 			if (player2.keyCode == "down" && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
@@ -153,28 +160,34 @@ var game = function() {
 		}
 	}
 	
- 	function moveAI(){
-/* 		let ballCenter = ball.offsetTop + ball.clientHeight / 2
-		let	paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2 */
-		let time = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX
-		let	futY = ball.offsetLeft + ballData.velY * time
-		if (ballData.velX > 0){
-			while(futY < 0 || futY > height){
-				if (futY < 0){
-					futY = 0
-				} else if (futY > height){
-					futY = height
-				}		let ballCenter = ball.offsetTop + ball.clientHeight / 2
-				let	paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2
+	function moveAI() {
+		let ballFutureY = 0
+	
+		if (ballData.velX > 0) {
+			let timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX
+			ballFutureY = ball.offsetTop + ballData.velY * timeToReach
+	
+			while (ballFutureY < 0 || ballFutureY > height) {
+				if (ballFutureY < 0) {
+					ballFutureY = -ballFutureY
+				} else if (ballFutureY > height) {
+					ballFutureY = 2 * height - ballFutureY
+				}
 			}
-			if (futY < paddleRight.offsetTop){
-				paddleRight.style.top = futY + "px"
-			} 
-			if (futY > paddleRight.offsetTop){
-				paddleRight.style.top = futY + "px"
-			}
+		} 
+		let paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2
+		/* let errorFactor = Math.random() * 10 - 10 */
+		targetY = ballFutureY // + errorFactor
+
+		if (paddleCenter < targetY) {
+			player2.keyCode = "down"
+			player2.keyPress = true
+		} else if (paddleCenter > targetY) {
+			player2.keyCode = "up"
+			player2.keyPress = true
 		}
 	}
+	
 
 	document.onkeydown = function(e){
 		e = e
@@ -188,12 +201,16 @@ var game = function() {
 				player1.keyPress = true
 				break
 			case "arrowup":
-				player2.keyCode = "up"
-				player2.keyPress = true
+				if (!AIOpponent){
+					player2.keyCode = "up"
+					player2.keyPress = true
+				}
 				break
-			case "arrowdown": 
-				player2.keyCode = "down"
-				player2.keyPress = true
+			case "arrowdown":
+				if (!AIOpponent){
+					player2.keyCode = "down"
+					player2.keyPress = true
+				}
 				break
 		}
 	}
