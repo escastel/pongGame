@@ -1,34 +1,47 @@
 var game = function() {
-	let	time = 30
-	let speed = 25
-	let	paddleSpeed = 20
-	let	AIOpponent = true
-	let	width = document.documentElement.clientWidth - speed
-	let height =  document.documentElement.clientHeight - speed 
-	let controlGame
-	let	controlAI
-	let angle
 	class Player {
-		constructor(){
+		constructor(paddle){
 			this.keyPress = false
 			this.keyCode = null
+			this.paddle = paddle
+			this.paddleCenter = 0
 			this.counter = 0
 		}
 	}
+
+	let player1 = new Player(paddleLeft)
+	let player2 = new Player(paddleRight)
+
+	let	generalData = {
+		time: 30,
+		speed: 25,
+		paddleSpeed: 20,
+		controlGame: 0
+	}
+
+	let	width = document.documentElement.clientWidth - generalData.speed
+	let height =  document.documentElement.clientHeight - generalData.speed
+
 	let	ballData = {
 		element: document.getElementById('ball'),
 		velX: 0,
-		velY: 0
+		velY: 0,
+		angle: 0
 	}
-	let player1 = new Player()
-	let player2 = new Player()
-	let targetY = 0
+
+	let AIData = {
+		targetY: 0,
+		timeToReach: 0,
+		paddleCenter: 0,
+		activate: true,
+		controlAI: 0
+	}
 
 	function	start(){
 		init()
-		controlGame = setInterval(play, time)
-		if (AIOpponent) 
-			controlAI = setInterval(moveAI, 1000)
+		generalData.controlGame = setInterval(play, generalData.time)
+		if (AIData.activate) 
+			AIData.controlAI = setInterval(moveAI, 1000)
 	}
 
 	function	init(){
@@ -42,22 +55,22 @@ var game = function() {
 	}
 
 	function	stop(){
-		clearInterval(controlGame)
-		if (AIOpponent)
-			clearInterval(controlAI)
+		clearInterval(generalData.controlGame)
+		if (AIData.activate)
+			clearInterval(AIData.controlAI)
 	}
 
 	function	resetBall(){
 		ball.style.left = "50%"
 	 	ball.style.top = Math.floor(Math.random() * 100) + "%"
-		speed = 10
-		angle = (Math.random() * Math.PI / 2) - Math.PI / 4
+		generalData.speed = 10
+		ballData.angle = (Math.random() * Math.PI / 2) - Math.PI / 4
 
 		if ((player1.counter + player2.counter) % 2 == 0)
-			ballData.velX = speed * Math.cos(angle) * -1
+			ballData.velX = generalData.speed * Math.cos(ballData.angle) * -1
 		else
-			ballData.velX = speed * Math.cos(angle) * 1
-		ballData.velY = speed * Math.sin(angle)
+			ballData.velX = generalData.speed * Math.cos(ballData.angle) * 1
+		ballData.velY = generalData.speed * Math.sin(ballData.angle)
 	}
 
 	function checkLost(){
@@ -98,23 +111,23 @@ var game = function() {
 	}
 
 	function checkState() {
-		if (collidePLayer(paddleLeft))
-			handlePaddleCollision(paddleLeft)
-		else if (collidePLayer(paddleRight))
-			handlePaddleCollision(paddleRight)
+		if (collidePLayer(player1.paddle))
+			handlePaddleCollision(player1.paddle)
+		else if (collidePLayer(player2.paddle))
+			handlePaddleCollision(player2.paddle)
 	}
 
 	function	collidePLayer(paddle){
 		if (paddle == paddleLeft){
-			if ((ball.offsetLeft <= (paddleLeft.clientWidth + paddleLeft.offsetLeft)) && 
-			(ball.offsetTop >= paddleLeft.offsetTop) && 
-			(ball.offsetTop <= (paddleLeft.offsetTop + paddleLeft.clientHeight)))
+			if ((ball.offsetLeft <= (paddle.clientWidth + paddle.offsetLeft)) && 
+			(ball.offsetTop >= paddle.offsetTop) && 
+			(ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
 				return true
 		}
 		else {
-			if ((ball.offsetLeft + ball.clientWidth >= (paddleRight.offsetLeft)) && 
-			(ball.offsetTop >= paddleRight.offsetTop) && 
-			(ball.offsetTop <= (paddleRight.offsetTop + paddleRight.clientHeight)))
+			if ((ball.offsetLeft + ball.clientWidth >= (paddle.offsetLeft)) && 
+			(ball.offsetTop >= paddle.offsetTop) && 
+			(ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
 				return true
 		}
 		return false
@@ -126,15 +139,15 @@ var game = function() {
 		let offset = (ballCenter - paddleCenter) / (paddle.clientHeight / 2)
 		let maxBounceAngle = Math.PI / 4
 		
-		speed = 25
-		angle = offset * maxBounceAngle
-		speed == Math.max(10, Math.sqrt(ballData.velX ** 2 + ballData.velY ** 2))
+		generalData.speed = 25
+		ballData.angle = offset * maxBounceAngle
+		generalData.speed == Math.max(10, Math.sqrt(ballData.velX ** 2 + ballData.velY ** 2))
 	
-		let newVelX = speed * Math.cos(angle)
+		let newVelX = generalData.speed * Math.cos(ballData.angle)
 		if (Math.abs(newVelX) < 2)
 			newVelX = newVelX > 0 ? 2 : -2
 		ballData.velX = newVelX * (ballData.velX > 0 ? -1 : 1)
-		ballData.velY = speed * Math.sin(angle)
+		ballData.velY = generalData.speed * Math.sin(ballData.angle)
 		
 		ball.style.left = (paddle === paddleLeft) 
 		? (paddle.offsetLeft + paddle.clientWidth) + "px"
@@ -144,45 +157,43 @@ var game = function() {
 	function	movePaddle(){
 		if (player1.keyPress){
 			if (player1.keyCode == "up" && paddleLeft.offsetTop >= 15)
-				paddleLeft.style.top = (paddleLeft.offsetTop - paddleSpeed) + "px"
+				paddleLeft.style.top = (paddleLeft.offsetTop - generalData.paddleSpeed) + "px"
 			if (player1.keyCode == "down" && (paddleLeft.offsetTop + paddleLeft.clientHeight) <= height)
-				paddleLeft.style.top = (paddleLeft.offsetTop + paddleSpeed) + "px"
+				paddleLeft.style.top = (paddleLeft.offsetTop + generalData.paddleSpeed) + "px"
 		}
 		if (player2.keyPress){
-			if (AIOpponent){
-				if ((targetY >= paddleRight.offsetTop) && (targetY <= (paddleRight.offsetTop + paddleRight.clientHeight)))
+			if (AIData.activate){
+				if ((AIData.targetY >= paddleRight.offsetTop) && (AIData.targetY <= (paddleRight.offsetTop + paddleRight.clientHeight)))
 					player2.keyPress = false
 			}
 			if (player2.keyCode == "up" && paddleRight.offsetTop >= 15)
-				paddleRight.style.top = (paddleRight.offsetTop - paddleSpeed) + "px"
+				paddleRight.style.top = (paddleRight.offsetTop - generalData.paddleSpeed) + "px"
 			if (player2.keyCode == "down" && (paddleRight.offsetTop + paddleRight.clientHeight) <= height)
-				paddleRight.style.top = (paddleRight.offsetTop + paddleSpeed) + "px"
+				paddleRight.style.top = (paddleRight.offsetTop + generalData.paddleSpeed) + "px"
 		}
 	}
 	
 	function moveAI() {
-		let ballFutureY = 0
-	
-		if (ballData.velX > 0) {
-			let timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX
-			ballFutureY = ball.offsetTop + ballData.velY * timeToReach
-	
-			while (ballFutureY < 0 || ballFutureY > height) {
-				if (ballFutureY < 0) {
-					ballFutureY = -ballFutureY
-				} else if (ballFutureY > height) {
-					ballFutureY = 2 * height - ballFutureY
-				}
-			}
-		} 
-		let paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2
-		/* let errorFactor = Math.random() * 10 - 10 */
-		targetY = ballFutureY // + errorFactor
+		// if (ballData.velX > 0) {
+		AIData.timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX
+		AIData.targetY = ball.offsetTop + ballData.velY * AIData.timeToReach
 
-		if (paddleCenter < targetY) {
+		while (AIData.targetY < 0 || AIData.targetY > height) {
+			if (AIData.targetY < 0) {
+				AIData.targetY = -AIData.targetY
+			} else if (ballFutureY > height) {
+				AIData.targetY = 2 * height - AIData.targetY
+			}
+		}
+		// } 
+		player2.paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2
+		// let errorFactor = Math.random() * 10 - 10
+		// AIData.targetY += errorFactor
+
+		if (player2.paddleCenter < AIData.targetY) {
 			player2.keyCode = "down"
 			player2.keyPress = true
-		} else if (paddleCenter > targetY) {
+		} else if (player2.paddleCenter > AIData.targetY) {
 			player2.keyCode = "up"
 			player2.keyPress = true
 		}
@@ -201,13 +212,13 @@ var game = function() {
 				player1.keyPress = true
 				break
 			case "arrowup":
-				if (!AIOpponent){
+				if (!AIData.activate){
 					player2.keyCode = "up"
 					player2.keyPress = true
 				}
 				break
 			case "arrowdown":
-				if (!AIOpponent){
+				if (!AIData.activate){
 					player2.keyCode = "down"
 					player2.keyPress = true
 				}
