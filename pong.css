@@ -11,18 +11,20 @@ body, html {
 	overflow: hidden;
 }
 
-/* #game {
+#game {
 	height: 100%;
 	width: 100%;
 	border: 20px solid white;
 	position: absolute;
-} */
+}
 
 #ball {
 	width: 20px;
 	height: 20px;
 	left: 50%;
 	top: 50%;
+	display: block;
+	border: 2px solid white;
 	position: absolute;
 	background-color: white;
 }
