@@ -20,7 +20,7 @@ function pong(): void{
 		speed: number;
 		paddleSpeed: number;
 		controlGame: number | null;
-	};
+	}
 
 	type PaddleCollisionDataType = {
 		offset: number;
@@ -34,7 +34,7 @@ function pong(): void{
 		velY: number;
 		angle: number;
 		ballCenter: number;
-	};
+	}
 
 	type AIDataType = {
 		timeToRefresh: number;
@@ -42,20 +42,20 @@ function pong(): void{
 		timeToReach: number;
 		activate: boolean;
 		controlAI: number | null;
-	};
+	}
 
 	const generalData: GeneralDataType = {
 		time: 30,
 		speed: 25,
 		paddleSpeed: 20,
 		controlGame: null
-	};
+	}
 
 	const paddleCollisionData: PaddleCollisionDataType = {
 		offset: 0,
 		maxBounceAngle: 0,
 		newVelX: 0
-	};
+	}
 
 	const ballData: BallDataType = {
 		ball: document.getElementById('ball') as HTMLElement,
@@ -63,7 +63,7 @@ function pong(): void{
 		velY: 0,
 		angle: 0,
 		ballCenter: 0
-	};
+	}
 
 	const AIData: AIDataType = {
 		timeToRefresh: 1000,
@@ -71,7 +71,7 @@ function pong(): void{
 		timeToReach: 0,
 		activate: true,
 		controlAI: null
-	};
+	}
 
 	const gameElement = document.getElementById('game');
 	if (!gameElement) throw new Error("HTML 'game' element not found.");
@@ -141,8 +141,10 @@ function pong(): void{
 
 	function moveBall(): void {
 		checkState();
+
 		ballData.ball.style.left = `${ballData.ball.offsetLeft + ballData.velX}px`;
 		ballData.ball.style.top = `${ballData.ball.offsetTop + ballData.velY}px`;
+
 		if (ballData.ball.offsetTop <= 0 || ballData.ball.offsetTop >= height) 
 			ballData.velY *= -1;
 	}
@@ -268,7 +270,7 @@ function pong(): void{
 			player2.keyPress = true; 
 			player2.keyCode = "down";
 		}
-	};
+	}
 
 	document.onkeyup = function(e: KeyboardEvent): void {
 		const key = e.key.toLowerCase();
@@ -276,7 +278,7 @@ function pong(): void{
 			player1.keyPress = false;
 		if (key === "arrowup" || key === "arrowdown") 
 			player2.keyPress = false;
-	};
+	}
 
 	start();
 }

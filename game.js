@@ -23,6 +23,7 @@ var game = function() {
     }
 
     let ballData = {
+        ball: document.getElementById('ball'),
         velX: 0,
         velY: 0,
         angle: 0,
@@ -30,6 +31,7 @@ var game = function() {
     }
 
     let AIData = {
+        timeToRefresh: 1000,
         targetY: 0,
         timeToReach: 0,
         activate: true,
@@ -48,7 +50,7 @@ var game = function() {
         init();
         generalData.controlGame = setInterval(play, generalData.time);
         if (AIData.activate) 
-            AIData.controlAI = setInterval(moveAI, 1000);
+            AIData.controlAI = setInterval(moveAI, AIData.timeToRefresh);
     }
 
     /**
@@ -71,25 +73,25 @@ var game = function() {
      * Detiene el juego y oculta la pelota.
      */
     function stop() {
-        clearInterval(generalData.controlGame);
+        if (generalData.controlGame) 
+            clearInterval(generalData.controlGame);
         if (AIData.activate)
             clearInterval(AIData.controlAI);
-        ball.style.display = "none";
+        ballData.ball.style.display = "none";
     }
 
     /**
      * Reinicia la posición y velocidad de la pelota.
      */
     function resetBall() {
+        generalData.speed = 10;
         ball.style.left = "50%";
      	ball.style.top = Math.floor(Math.random() * 100) + "%";
-        generalData.speed = 10;
         ballData.angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
 
+        ballData.velX = generalData.speed * Math.cos(ballData.angle)
         if ((player1.counter + player2.counter) % 2 == 0)
-            ballData.velX = generalData.speed * Math.cos(ballData.angle) * -1;
-        else
-            ballData.velX = generalData.speed * Math.cos(ballData.angle) * 1;
+            ballData.velX *= -1;
         ballData.velY = generalData.speed * Math.sin(ballData.angle);
     }
 
@@ -99,23 +101,17 @@ var game = function() {
     function checkLost() {
         if (ball.offsetLeft >= width) {
             updateScore(paddleLeft);
-            if(player1.counter < 10)
-                init();
-            else
-                stop();
+            player1.counter < 10 ? init() : stop();
         }
         if (ball.offsetLeft <= 0) {
             updateScore(paddleRight);
-            if(player2.counter < 10)
-                init();
-            else
-                stop();
+            player2.counter < 10 ? init() : stop();
         }
     }
 
     /**
      * Actualiza el marcador del jugador correspondiente.
-     * @param {string} paddle La pala del jugador que ha anotado.
+     * @param {HTMLElement} paddle La pala del jugador que ha anotado.
      */
     function updateScore(paddle) {
         if (paddle == paddleLeft) {
@@ -200,7 +196,7 @@ var game = function() {
             if (paddleCollisionData.newVelX > 0)
                 paddleCollisionData.newVelX = 2;
             else
-                paddleCollisionData.newVelX = -2;
+            	paddleCollisionData.newVelX = -2;
         }
 
         if (ballData.velX > 0)
