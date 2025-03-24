@@ -16,6 +16,12 @@ var game = function() {
         controlGame: 0
     }
 
+    let paddleCollisionData = {
+        offset: 0,
+        maxBounceAngle: 0,
+        newVelX: 0
+    }
+
     let ballData = {
         velX: 0,
         velY: 0,
@@ -126,6 +132,7 @@ var game = function() {
      */
     function moveBall() {
         checkState();
+
         ball.style.left = (ball.offsetLeft + ballData.velX) + "px";
         ball.style.top = (ball.offsetTop + ballData.velY) + "px";
 
@@ -145,7 +152,7 @@ var game = function() {
 
     /**
      * Verifica si la pelota ha colisionado con una pala.
-     * @param {string} paddle La pala a verificar.
+     * @param {HTMLElement} paddle La pala a verificar.
      * @returns {boolean} true si la pelota ha colisionado con la pala, false en caso contrario.
      */
     function collidePLayer(paddle) {
@@ -164,30 +171,48 @@ var game = function() {
     }
 
     /**
-     * Maneja la colisión de la pelota con una pala.
+     * Actualiza los datos necesarios para calcular la colisión con la paleta.
      * @param {Player} player El jugador cuya pala ha colisionado con la pelota.
-     * @param {string} paddle La pala que ha colisionado con la pelota.
+     * @param {HTMLElement} paddle La pala que ha colisionado con la pelota.
      */
-
-    function handlePaddleCollision(player, paddle) {
+    function setPaddleCollision(player, paddle){
         player.paddleCenter = paddle.offsetTop + paddle.clientHeight / 2;
         ballData.ballCenter = ball.offsetTop + ball.clientHeight / 2;
-        let offset = (ballData.ballCenter - player.paddleCenter) / (paddle.clientHeight / 2);
-        let maxBounceAngle = Math.PI / 4;
-        
         generalData.speed = 25;
-        ballData.angle = offset * maxBounceAngle;
+
+        paddleCollisionData.offset = (ballData.ballCenter - player.paddleCenter) / (paddle.clientHeight / 2);
+        paddleCollisionData.maxBounceAngle = Math.PI / 4;
+
+        ballData.angle = paddleCollisionData.offset * paddleCollisionData.maxBounceAngle;
         generalData.speed == Math.max(10, Math.sqrt(ballData.velX ** 2 + ballData.velY ** 2));
-    
-        let newVelX = generalData.speed * Math.cos(ballData.angle);
-        if (Math.abs(newVelX) < 2)
-            newVelX = newVelX > 0 ? 2 : -2;
-        ballData.velX = newVelX * (ballData.velX > 0 ? -1 : 1);
+        paddleCollisionData.newVelX = generalData.speed * Math.cos(ballData.angle);
+    }
+
+    /**
+     * Maneja la colisión de la pelota con una pala.
+     * @param {Player} player El jugador cuya pala ha colisionado con la pelota.
+     * @param {HTMLElement} paddle La pala que ha colisionado con la pelota.
+     */
+    function handlePaddleCollision(player, paddle) {
+       setPaddleCollision(player, paddle);
+
+        if (Math.abs(paddleCollisionData.newVelX) < 2){
+            if (paddleCollisionData.newVelX > 0)
+                paddleCollisionData.newVelX = 2;
+            else
+                paddleCollisionData.newVelX = -2;
+        }
+
+        if (ballData.velX > 0)
+            ballData.velX = paddleCollisionData.newVelX * -1;
+        else
+            ballData.velX = paddleCollisionData.newVelX * 1;
         ballData.velY = generalData.speed * Math.sin(ballData.angle);
         
-        ball.style.left = (paddle === paddleLeft) 
-        ? (paddle.offsetLeft + paddle.clientWidth) + "px"
-        : (paddle.offsetLeft - ball.clientWidth) + "px";
+        if (paddle === paddleLeft)
+            ball.style.left = (paddle.offsetLeft + paddle.clientWidth) + "px"
+        else if (paddle === paddleRight)
+            ball.style.left = (paddle.offsetLeft - ball.clientWidth) + "px";
     }
 
     /**
@@ -213,11 +238,19 @@ var game = function() {
     }
 
     /**
+     * Actualiza los datos necesarios para mover la paleta de la IA.
+     */
+    function setAI(){
+        AIData.timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX;
+        AIData.targetY = ball.offsetTop + ballData.velY * AIData.timeToReach;
+        player2.paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2;  
+    }
+
+    /**
      * Mueve la pala de la IA para seguir la pelota.
      */
     function moveAI() {
-        AIData.timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX;
-        AIData.targetY = ball.offsetTop + ballData.velY * AIData.timeToReach;
+        setAI();
 
         while (AIData.targetY < 0 || AIData.targetY > height) {
             if (AIData.targetY < 0) {
@@ -226,7 +259,6 @@ var game = function() {
                 AIData.targetY = 2 * height - AIData.targetY;
             }
         }
-        player2.paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2;
 
         if (player2.paddleCenter < AIData.targetY) {
             player2.keyCode = "down";
@@ -238,37 +270,32 @@ var game = function() {
     }
 
     document.onkeydown = function(e) {
-        e = e || window.event;
-        switch(e.key.toLowerCase()) {   
-            case "w":
-                player1.keyCode = "up";
-                player1.keyPress = true;
-                break;
-            case "s":
-                player1.keyCode = "down";
-                player1.keyPress = true;
-                break;
-            case "arrowup":
-                if (!AIData.activate) {
-                    player2.keyCode = "up";
-                    player2.keyPress = true;
-                }
-                break;
-            case "arrowdown":
-                if (!AIData.activate) {
-                    player2.keyCode = "down";
-                    player2.keyPress = true;
-                }
-                break;
-        }
-    }
+		const key = e.key.toLowerCase();
+		if (key === "w") {
+			player1.keyPress = true; 
+			player1.keyCode = "up";
+		}
+		if (key === "s") {
+			player1.keyPress = true; 
+			player1.keyCode = "down";
+		}
+		if (key === "arrowup" && !AIData.activate) {
+			player2.keyPress = true; 
+			player2.keyCode = "up";
+		}
+		if (key === "arrowdown" && !AIData.activate) {
+			player2.keyPress = true; 
+			player2.keyCode = "down";
+		}
+	}
 
-    document.onkeyup = function(e) {
-        if (e.key.toLowerCase() == "w" || e.key.toLowerCase() == "s")
-            player1.keyPress = false;
-        if (e.key == "ArrowUp" || e.key == "ArrowDown")
-            player2.keyPress = false;
-    }
+	document.onkeyup = function(e) {
+		const key = e.key.toLowerCase();
+		if (key === "w" || key === "s") 
+			player1.keyPress = false;
+		if (key === "arrowup" || key === "arrowdown") 
+			player2.keyPress = false;
+	}
 
     start();
 }()
