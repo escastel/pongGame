@@ -85,8 +85,8 @@ var game = function() {
      */
     function resetBall() {
         generalData.speed = 10;
-        ball.style.left = "50%";
-     	ball.style.top = Math.floor(Math.random() * 100) + "%";
+        ballData.ball.style.left = "50%";
+        ballData.ball.style.top = Math.floor(Math.random() * 100) + "%";
         ballData.angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
 
         ballData.velX = generalData.speed * Math.cos(ballData.angle)
@@ -99,11 +99,11 @@ var game = function() {
      * Verifica si la pelota ha salido del campo y actualiza el marcador.
      */
     function checkLost() {
-        if (ball.offsetLeft >= width) {
+        if (ballData.ball.offsetLeft >= width) {
             updateScore(paddleLeft);
             player1.counter < 10 ? init() : stop();
         }
-        if (ball.offsetLeft <= 0) {
+        if (ballData.ball.offsetLeft <= 0) {
             updateScore(paddleRight);
             player2.counter < 10 ? init() : stop();
         }
@@ -129,11 +129,16 @@ var game = function() {
     function moveBall() {
         checkState();
 
-        ball.style.left = (ball.offsetLeft + ballData.velX) + "px";
-        ball.style.top = (ball.offsetTop + ballData.velY) + "px";
+        ballData.ball.style.left = (ballData.ball.offsetLeft + ballData.velX) + "px";
+        ballData.ball.style.top = (ballData.ball.offsetTop + ballData.velY) + "px";
 
-     	if (ball.offsetTop <= 0 || ball.offsetTop >= height)
+        if (ballData.ball.offsetTop <= 0) {
+            ballData.ball.style.top = "0px";
             ballData.velY *= -1;
+        } else if (ballData.ball.offsetTop + ballData.ball.clientHeight >= height) {
+            ballData.ball.style.top = (height - ballData.ball.clientHeight) + "px";
+            ballData.velY *= -1;
+        }
     }
 
     /**
@@ -149,18 +154,18 @@ var game = function() {
     /**
      * Verifica si la pelota ha colisionado con una pala.
      * @param {HTMLElement} paddle La pala a verificar.
-     * @returns {boolean} true si la pelota ha colisionado con la pala, false en caso contrario.
+     * @returns {boolean} 'true si la pelota ha colisionado con la pala, false en caso contrario.
      */
     function collidePLayer(paddle) {
         if (paddle == paddleLeft) {
-            if ((ball.offsetLeft <= (paddle.clientWidth + paddle.offsetLeft)) && 
-            (ball.offsetTop >= paddle.offsetTop) && 
-            (ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
+            if ((ballData.ball.offsetLeft <= (paddle.clientWidth + paddle.offsetLeft)) && 
+            (ballData.ball.offsetTop >= paddle.offsetTop) && 
+            (ballData.ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
                 return true;
         } else {
-            if ((ball.offsetLeft + ball.clientWidth >= (paddle.offsetLeft)) && 
-            (ball.offsetTop >= paddle.offsetTop) && 
-            (ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
+            if ((ballData.ball.offsetLeft + ballData.ball.clientWidth >= (paddle.offsetLeft)) && 
+            (ballData.ball.offsetTop >= paddle.offsetTop) && 
+            (ballData.ball.offsetTop <= (paddle.offsetTop + paddle.clientHeight)))
                 return true;
         }
         return false;
@@ -173,7 +178,7 @@ var game = function() {
      */
     function setPaddleCollision(player, paddle){
         player.paddleCenter = paddle.offsetTop + paddle.clientHeight / 2;
-        ballData.ballCenter = ball.offsetTop + ball.clientHeight / 2;
+        ballData.ballCenter = ballData.ball.offsetTop + ballData.ball.clientHeight / 2;
         generalData.speed = 25;
 
         paddleCollisionData.offset = (ballData.ballCenter - player.paddleCenter) / (paddle.clientHeight / 2);
@@ -206,9 +211,9 @@ var game = function() {
         ballData.velY = generalData.speed * Math.sin(ballData.angle);
         
         if (paddle === paddleLeft)
-            ball.style.left = (paddle.offsetLeft + paddle.clientWidth) + "px"
+            ballData.ball.style.left = (paddle.offsetLeft + paddle.clientWidth) + "px"
         else if (paddle === paddleRight)
-            ball.style.left = (paddle.offsetLeft - ball.clientWidth) + "px";
+            ballData.ball.style.left = (paddle.offsetLeft - ballData.ball.clientWidth) + "px";
     }
 
     /**
@@ -237,8 +242,8 @@ var game = function() {
      * Actualiza los datos necesarios para mover la paleta de la IA.
      */
     function setAI(){
-        AIData.timeToReach = (paddleRight.offsetLeft - ball.offsetLeft) / ballData.velX;
-        AIData.targetY = ball.offsetTop + ballData.velY * AIData.timeToReach;
+        AIData.timeToReach = (paddleRight.offsetLeft - ballData.ball.offsetLeft) / ballData.velX;
+        AIData.targetY = ballData.ball.offsetTop + ballData.velY * AIData.timeToReach;
         player2.paddleCenter = paddleRight.offsetTop + paddleRight.clientHeight / 2;  
     }
 

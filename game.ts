@@ -145,8 +145,13 @@ function pong(): void{
 		ballData.ball.style.left = `${ballData.ball.offsetLeft + ballData.velX}px`;
 		ballData.ball.style.top = `${ballData.ball.offsetTop + ballData.velY}px`;
 
-		if (ballData.ball.offsetTop <= 0 || ballData.ball.offsetTop >= height) 
-			ballData.velY *= -1;
+		if (ballData.ball.offsetTop <= 0) {
+            ballData.ball.style.top = `0px`;
+            ballData.velY *= -1;
+        } else if (ballData.ball.offsetTop + ballData.ball.clientHeight >= height) {
+            ballData.ball.style.top = `${height - ballData.ball.clientHeight}px`;
+            ballData.velY *= -1;
+        }
 	}
 
 	function checkState(): void {
