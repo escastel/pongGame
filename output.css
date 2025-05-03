@@ -1,0 +1,130 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body, html {
+	height: 100%;
+	width: 100%;
+	background-color: black;
+	overflow: hidden;
+}
+
+#game {
+	height: 100%;
+	width: 100%;
+	border: 20px solid white;
+	position: absolute;
+}
+
+#ball {
+	width: 20px;
+	height: 20px;
+	left: 50%;
+	top: 50%;
+	display: block;
+	border: 2px solid white;
+	position: absolute;
+	background-color: white;
+}
+
+.paddle {
+	width: 20px;
+	height: 120px;
+	background-color: white;
+	position: absolute;
+	top: 50%;
+}
+
+#paddleLeft {
+	left: 2%;
+}
+
+#paddleRight {
+ 	right: 2%;
+}
+
+#line {
+	width: 50%;
+	height: 100%;
+	border-right: 10px dashed white;
+	position: absolute;
+}
+
+.counter {
+	color: white;
+	position: absolute;
+	top: 10%;
+	font-size: 700%;
+	font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+#counter1 {
+	left: 25%;
+}
+
+#counter2 {
+	left: 65%;
+}
+
+/* Custom styles for the game */
+
+#powerUp {
+	position: absolute;
+	width: 30%;
+	height: 40%;
+	background-color: gold;
+	border-radius: 50%;
+	display: none;
+}
+
+.powerUpAppear {
+	animation: powerUpAppear  0.4s ease;
+}
+
+.powerUpBlink {
+	animation: powerUpBlink 0.6s ease 3;
+}
+
+.powerUpDisappear {
+	animation: powerUpDisappear 0.4s ease forwards;
+  }
+
+@keyframes powerUpAppear  {
+	0% {
+	  transform: scale(0.5);
+	  opacity: 0;
+	}
+	60% {
+	  transform: scale(1.2);
+	  opacity: 1;
+	}
+	100% {
+	  transform: scale(1);
+	}
+}
+
+@keyframes powerUpBlink {
+	0% {
+	  opacity: 1;
+	}
+	50% {
+	  opacity: 0;
+	}
+	100% {
+	  opacity: 1;
+	}
+}
+
+@keyframes powerUpDisappear {
+	0% {
+	  opacity: 1;
+	  transform: scale(1);
+	}
+	100% {
+	  opacity: 0;
+	  transform: scale(0.8);
+	}
+}
+  

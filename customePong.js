@@ -12,12 +12,15 @@ function game() {
         paddle;
         paddleCenter;
         counter;
+        keysAffected;
         constructor(paddle) {
             this.keyPress = false;
             this.keyCode = null;
             this.paddle = paddle;
             this.paddleCenter = 0;
             this.counter = 0;
+            this.keysAffected = false;
+            this.paddleSpeed = 0.04;
         }
     }
 
@@ -59,12 +62,23 @@ function game() {
         ballRelativeTop: 0,
         player1RelativeTop: 0,
         player2RelativeTop: 0,
+        powerUpRelativeLeft: 0,
+        powerUpRelativeTop: 0,
         newSpeed: 0
     };
+
+    const powerUpData = {
+        powerUp: document.getElementById('powerUp'),
+        types: ['paddleSize', 'ballSpeed', 'paddleSpeed', 'reverse'],
+        active: false,
+        timeout: 6000,
+        controlPowerUp: null
+    }
 
     function start() {
         init();
         generalData.controlGame = setInterval(play, generalData.time);
+        powerUpData.controlPowerUp = setInterval(spawnPowerUp, 5000);
         if (AIData.activate)
             AIData.controlAI = setInterval(moveAI, AIData.timeToRefresh);
     }
@@ -74,6 +88,7 @@ function game() {
     }
 
     function play() {
+        setOnresize();
         moveBall();
         movePaddle();
         checkLost();
@@ -84,6 +99,8 @@ function game() {
 			clearInterval(generalData.controlGame);
 		if (AIData.activate && AIData.controlAI) 
 			clearInterval(AIData.controlAI);
+        if (powerUpData.controlPowerUp)
+            clearInterval(powerUpData.controlPowerUp);
 		ballData.ball.style.display = "none";
 	}
 
@@ -103,12 +120,23 @@ function game() {
     function checkLost() {
         if (ballData.ball.offsetLeft >= width) {
             updateScore(player1.paddle);
-            player1.counter < 10 ? init() : stop();
+            if (player1.counter < 10)
+                init()
+            else{
+                stop();
+                return 1;
+            }
         }
         if (ballData.ball.offsetLeft <= 0) {
             updateScore(player2.paddle);
-            player2.counter < 10 ? init() : stop();
+            if (player2.counter < 10)
+                init()
+            else{
+                stop();
+                return 1;
+            }
         }
+        return 0;
     }
 
     function updateScore(paddle) {
@@ -123,6 +151,7 @@ function game() {
     }
     
     function moveBall() {
+        checkBallPowerUpCollision();
 		checkState();
 
 		ballData.ball.style.left = `${ballData.ball.offsetLeft + ballData.velX}px`;
@@ -180,9 +209,9 @@ function game() {
     function movePaddle() {
         if (player1.keyPress) {
             if (player1.keyCode === "up" && player1.paddle.offsetTop >= generalData.paddleMargin)
-                player1.paddle.style.top = `${player1.paddle.offsetTop - height * generalData.paddleSpeed}px`;
+                player1.paddle.style.top = `${player1.paddle.offsetTop - height * player1.paddleSpeed}px`;
             if (player1.keyCode === "down" && (player1.paddle.offsetTop + player1.paddle.clientHeight) <= height - generalData.paddleMargin)
-                player1.paddle.style.top = `${player1.paddle.offsetTop + height * generalData.paddleSpeed}px`;
+                player1.paddle.style.top = `${player1.paddle.offsetTop + height * player1.paddleSpeed}px`;
         }
         if (player2.keyPress) {
             if (AIData.activate) {
@@ -190,9 +219,9 @@ function game() {
                     player2.keyPress = false;
             }
             if (player2.keyCode === "up" && player2.paddle.offsetTop >= generalData.paddleMargin)
-                player2.paddle.style.top = `${player2.paddle.offsetTop - height * generalData.paddleSpeed}px`;
+                player2.paddle.style.top = `${player2.paddle.offsetTop - height * player2.paddleSpeed}px`;
             if (player2.keyCode === "down" && (player2.paddle.offsetTop + player2.paddle.clientHeight) <= height - generalData.paddleMargin)
-                player2.paddle.style.top = `${player2.paddle.offsetTop + height * generalData.paddleSpeed}px`;
+                player2.paddle.style.top = `${player2.paddle.offsetTop + height * player2.paddleSpeed}px`;
         }
     }
 
@@ -213,11 +242,17 @@ function game() {
             AIData.targetY = AIData.targetY < 0 ? AIData.targetY * -1 : 2 * height - AIData.targetY;
         }
         if (player2.paddleCenter < AIData.targetY) {
-            player2.keyCode = "down";
+            if (!player2.keysAffected)
+                player2.keyCode = "down";
+            else
+                player2.keyCode = "up";
             player2.keyPress = true;
         }
         else if (player2.paddleCenter > AIData.targetY) {
-            player2.keyCode = "up";
+            if (!player2.keysAffected)
+                player2.keyCode = "up";
+            else
+                player2.keyCode = "down";
             player2.keyPress = true;
         }
     }
@@ -225,20 +260,32 @@ function game() {
     document.onkeydown = function (e) {
         const key = e.key.toLowerCase();
         if (key === "w") {
+            if (!player1.keysAffected)
+                player1.keyCode = "up";
+            else
+                player1.keyCode = "down";
             player1.keyPress = true;
-            player1.keyCode = "up";
         }
         if (key === "s") {
+            if (!player1.keysAffected)
+                player1.keyCode = "down";
+            else
+                player1.keyCode = "up";
             player1.keyPress = true;
-            player1.keyCode = "down";
         }
         if (key === "arrowup" && !AIData.activate) {
+            if (!player2.keysAffected)
+                player2.keyCode = "up";
+            else
+                player2.keyCode = "down";
             player2.keyPress = true;
-            player2.keyCode = "up";
         }
-        if (key === "arrowdown" && !AIData.activate) {
+        if (key === "arrowdown" && !AIData.activate && !player2.keysAffected) {
+            if (!player2.keysAffected)
+                player2.keyCode = "down";
+            else
+                player2.keyCode = "up";
             player2.keyPress = true;
-            player2.keyCode = "down";
         }
     };
 
@@ -256,6 +303,11 @@ function game() {
         onresizeData.player1RelativeTop = player1.paddle.offsetTop / height;
         onresizeData.player2RelativeTop = player2.paddle.offsetTop / height;
         
+        if (powerUpData.powerUp.style.display !== "none") {
+            onresizeData.powerUpRelativeLeft = powerUpData.powerUp.offsetLeft / width;
+            onresizeData.powerUpRelativeTop = powerUpData.powerUp.offsetTop / height;
+        }
+
         if (gameElement) {
             width = gameElement.clientWidth;
             height = gameElement.clientHeight;
@@ -277,6 +329,11 @@ function game() {
         player1.paddle.style.top = `${onresizeData.player1RelativeTop * height}px`;
         player2.paddle.style.top = `${onresizeData.player2RelativeTop * height}px`;
         
+        if (powerUpData.powerUp.style.display !== "none") {
+            powerUpData.powerUp.style.left = `${onresizeData.powerUpRelativeLeft * width}px`;
+            powerUpData.powerUp.style.top = `${onresizeData.powerUpRelativeTop * height}px`;
+        }
+
         if (ballData.ball.offsetLeft < 0) {
             updateScore(player2.paddle);
             resetBall();
@@ -297,7 +354,140 @@ function game() {
         }
     };
 
-    setOnresize();
+    /* PowerUp setup */
+
+    function spawnPowerUp() {
+        if (powerUpData.active) return;
+
+        powerUpData.active = true;
+        const paddleLeft = player1.paddle.offsetLeft + player1.paddle.clientWidth;
+        const paddleRight = player2.paddle.offsetLeft - 40;
+
+        const x = Math.random() * (paddleRight - paddleLeft) + paddleLeft;
+        const y = Math.random() * (height - 40);
+
+        if (x < 0 || x > width - 40 || y < 0 || y > height - 40) {
+            powerUpData.active = false;
+            return;
+        }
+
+        powerUpData.powerUp.style.left = `${x}px`;
+        powerUpData.powerUp.style.top = `${y}px`;
+        powerUpData.powerUp.style.display = "block";
+
+        powerUpData.powerUp.classList.remove('powerUpAppear', 'powerUpBlink');
+        void powerUpData.powerUp.offsetWidth;
+        powerUpData.powerUp.classList.add('powerUpAppear');
+
+        powerUpData.timeout = setTimeout(() => {
+        powerUpData.powerUp.classList.add('powerUpBlink');
+        setTimeout(() => {
+            powerUpData.powerUp.classList.remove('powerUpBlink');
+            powerUpData.powerUp.classList.add('powerUpDisappear');
+            setTimeout(() => {
+                powerUpData.powerUp.style.display = "none";
+                powerUpData.powerUp.classList.remove('powerUpAppear', 'powerUpDisappear');
+                powerUpData.active = false;
+            }, 400);
+        }, 600);
+    }, powerUpData.timeout);
+    }
+
+    function checkBallPowerUpCollision() {
+        const ballRect = ballData.ball.getBoundingClientRect();
+        const powerRect = powerUpData.powerUp.getBoundingClientRect();
+
+        if (ballRect.left < powerRect.right &&
+            ballRect.right > powerRect.left &&
+            ballRect.top < powerRect.bottom &&
+            ballRect.bottom > powerRect.top)
+            activatePowerUp();
+    }
+
+    function activatePowerUp() {
+        /* const power = powerUpData.types[Math.floor(Math.random() * powerUpData.types.length)]; */
+        const power = 'paddleSize';
+
+        switch (power) {
+            case 'paddleSize':
+                activePaddleSize();
+                break;
+            case 'ballSpeed':
+                activeBallSpeed();
+                break;
+            case 'paddleSpeed':
+                activePaddleSpeed();
+                break;
+            case 'reverse':
+                activeReverseControl();
+                break;
+        }
+
+        powerUpData.powerUp.style.display = "none";
+        powerUp.classList.remove('powerUpAnimate', 'powerUpDisappear');
+        clearTimeout(powerUpData.timeout);
+        powerUpData.active = false;
+    }
+
+    function activePaddleSize(){
+        const paddle = ballData.velX < 0 ? player2.paddle : player1.paddle;
+        const paddleAffected = ballData.velX < 0 ? player1.paddle : player2.paddle;
+        paddle.style.height = "200px";
+        paddleAffected.style.height = "80px"
+
+        if (paddle.offsetTop < generalData.paddleMargin)
+            paddle.style.top = `${generalData.paddleMargin}px`;
+        else if (paddle.offsetTop + paddle.clientHeight > height - generalData.paddleMargin)
+            paddle.style.top = `${height - generalData.paddleMargin - paddle.clientHeight}px`;
+
+        if (paddleAffected.offsetTop < generalData.paddleMargin)
+            paddleAffected.style.top = `${generalData.paddleMargin}px`;
+        else if (paddleAffected.offsetTop + paddleAffected.clientHeight > height - generalData.paddleMargin)
+            paddleAffected.style.top = `${height - generalData.paddleMargin - paddleAffected.clientHeight}px`;
+
+        setTimeout(() => {
+            paddle.style.height = "120px";
+            if (paddle.offsetTop < generalData.paddleMargin)
+                paddle.style.top = `${generalData.paddleMargin}px`;
+            else if (paddle.offsetTop + paddle.clientHeight > height - generalData.paddleMargin)
+                paddle.style.top = `${height - generalData.paddleMargin - paddle.clientHeight}px`;
+
+            paddleAffected.style.height = "120px";
+            if (paddleAffected.offsetTop < generalData.paddleMargin)
+                paddleAffected.style.top = `${generalData.paddleMargin}px`;
+            else if (paddleAffected.offsetTop + paddleAffected.clientHeight > height - generalData.paddleMargin)
+                paddleAffected.style.top = `${height - generalData.paddleMargin - paddleAffected.clientHeight}px`;
+        }, 5000);
+    }
+
+    function activeBallSpeed(){
+        ballData.velX *= 1.5;
+        ballData.velY *= 1.5;
+
+        setTimeout(() => {
+            ballData.velX /= 1.5;
+            ballData.velY /= 1.5;
+        }, 5000);
+    }
+
+    function activePaddleSpeed(){
+        const playerAffected = ballData.velX < 0 ? player1 : player2;
+        playerAffected.paddleSpeed = 0.06;
+
+        setTimeout(() => {
+            playerAffected.paddleSpeed = 0.04;
+        }, 5000);
+    }
+    function activeReverseControl(){
+        const playerAffected = ballData.velX < 0 ? player1 : player2;
+        playerAffected.keysAffected = true;
+
+        setTimeout(() => {
+            playerAffected.keysAffected = false;
+        }, 5000);
+    }
+
     start();
 }
+
 game();
