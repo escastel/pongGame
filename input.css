@@ -142,11 +142,33 @@ body, html {
 
 @keyframes fadeTrail {
 	0% {
-		opacity: 0.6;
-		transform: scale(1);
+	opacity: 0.6;
+	transform: scale(1);
 	}
 	100% {
-		opacity: 0;
-		transform: scale(1.5);
+	opacity: 0;
+	transform: scale(1.5);
 	}
+}
+
+@keyframes paddleGrow {
+	0% { height: 120px; opacity: 0.6; }
+	50% { height: 160px; opacity: 1; }
+	75% { height: 140px; opacity: 0.6;}
+	100% { height: 160px; opacity: 1;}
+}
+
+@keyframes paddleShrink {
+	0% { height: 120px; opacity: 0.6; }
+	50% { height: 80px; opacity: 1; }
+	75% { height: 100px; opacity: 0.6; }
+	100% { height: 80px; opacity: 1;}
+}
+
+.paddleGrowEffect {
+	animation: paddleGrow 1.5s ease-out forwards;
+}
+
+.paddleShrinkEffect {
+	animation: paddleShrink 1.5s ease-out forwards;
 }

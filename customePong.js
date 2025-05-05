@@ -426,7 +426,7 @@ function game() {
 
     function activatePowerUp() {
         /* const power = powerUpData.types[Math.floor(Math.random() * powerUpData.types.length)]; */
-        const power = 'ballSpeed'; // For testing purposes
+        const power = 'paddleSize'; // For testing purposes
 
         switch (power) {
             case 'paddleSize':
@@ -452,8 +452,8 @@ function game() {
     function activePaddleSize(){
         const paddle = ballData.velX < 0 ? player2.paddle : player1.paddle;
         const paddleAffected = ballData.velX < 0 ? player1.paddle : player2.paddle;
-        paddle.style.height = "160px";
-        paddleAffected.style.height = "80px"
+        paddle.classList.add('paddleGrowEffect');
+        paddleAffected.classList.add('paddleShrinkEffect');
         generalData.paddleMargin = height * 0.05;
 
         if (paddle.offsetTop < generalData.paddleMargin)
@@ -469,13 +469,14 @@ function game() {
         setTimeout(() => {
             generalData.paddleMargin = height * 0.03;
 
-            paddle.style.height = "120px";
+            paddle.classList.remove('paddleGrowEffect');
             if (paddle.offsetTop < generalData.paddleMargin)
                 paddle.style.top = `${generalData.paddleMargin}px`;
             else if (paddle.offsetTop + paddle.clientHeight > height - generalData.paddleMargin)
                 paddle.style.top = `${height - generalData.paddleMargin - paddle.clientHeight}px`;
 
             paddleAffected.style.height = "120px";
+            paddleAffected.classList.remove('paddleShrinkEffect');
             if (paddleAffected.offsetTop < generalData.paddleMargin)
                 paddleAffected.style.top = `${generalData.paddleMargin}px`;
             else if (paddleAffected.offsetTop + paddleAffected.clientHeight > height - generalData.paddleMargin)
@@ -490,9 +491,6 @@ function game() {
         const trailInterval = setInterval(() => {
             const trail = document.createElement("div");
             trail.className = "ballTrailClone";
-    
-            const ballRect = ballData.ball.getBoundingClientRect();
-            const gameRect = document.getElementById("game").getBoundingClientRect();
     
             trail.style.left = `${ballData.ball.offsetLeft - ballData.velX}px`
             trail.style.top = `${ballData.ball.offsetTop - ballData.velY}px`;
