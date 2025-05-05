@@ -87,11 +87,19 @@ function game() {
         resetBall();
     }
 
+    /* Controlar en un futuro cuando se cambia de pestaña. */
+
     function play() {
-        setOnresize();
-        moveBall();
-        movePaddle();
-        checkLost();
+        if (document.visibilityState !== "hidden"){
+            setOnresize();
+            moveBall();
+            movePaddle();
+            if (checkLost())
+            return;
+        }
+        else{
+            console.log("Game paused");
+        }
     }
 
     function stop() {
@@ -208,20 +216,32 @@ function game() {
 
     function movePaddle() {
         if (player1.keyPress) {
-            if (player1.keyCode === "up" && player1.paddle.offsetTop >= generalData.paddleMargin)
+            if (player1.keyCode === "up" && player1.paddle.offsetTop >= generalData.paddleMargin){
                 player1.paddle.style.top = `${player1.paddle.offsetTop - height * player1.paddleSpeed}px`;
-            if (player1.keyCode === "down" && (player1.paddle.offsetTop + player1.paddle.clientHeight) <= height - generalData.paddleMargin)
+                if (player1.paddle.offsetTop < generalData.paddleMargin)
+                    player1.paddle.style.top = `${generalData.paddleMargin}px`;
+            }
+            if (player1.keyCode === "down" && (player1.paddle.offsetTop + player1.paddle.clientHeight) <= height - generalData.paddleMargin){
                 player1.paddle.style.top = `${player1.paddle.offsetTop + height * player1.paddleSpeed}px`;
+                if (player1.paddle.offsetTop + player1.paddle.clientHeight > height - generalData.paddleMargin)
+                    player1.paddle.style.top = `${height - generalData.paddleMargin - player1.paddle.clientHeight}px`;
+            }
         }
         if (player2.keyPress) {
             if (AIData.activate) {
                 if ((AIData.targetY >= player2.paddle.offsetTop) && (AIData.targetY <= (player2.paddle.offsetTop + player2.paddle.clientHeight)))
                     player2.keyPress = false;
             }
-            if (player2.keyCode === "up" && player2.paddle.offsetTop >= generalData.paddleMargin)
+            if (player2.keyCode === "up" && player2.paddle.offsetTop >= generalData.paddleMargin){
                 player2.paddle.style.top = `${player2.paddle.offsetTop - height * player2.paddleSpeed}px`;
-            if (player2.keyCode === "down" && (player2.paddle.offsetTop + player2.paddle.clientHeight) <= height - generalData.paddleMargin)
+                if (player2.paddle.offsetTop < generalData.paddleMargin)
+                    player2.paddle.style.top = `${generalData.paddleMargin}px`;
+            }
+            if (player2.keyCode === "down" && (player2.paddle.offsetTop + player2.paddle.clientHeight) <= height - generalData.paddleMargin){
                 player2.paddle.style.top = `${player2.paddle.offsetTop + height * player2.paddleSpeed}px`;
+                if (player2.paddle.offsetTop + player2.paddle.clientHeight > height - generalData.paddleMargin)
+                    player2.paddle.style.top = `${height - generalData.paddleMargin - player2.paddle.clientHeight}px`;
+            }
         }
     }
 
@@ -366,7 +386,7 @@ function game() {
         const x = Math.random() * (paddleRight - paddleLeft) + paddleLeft;
         const y = Math.random() * (height - 40);
 
-        if (x < 0 || x > width - 40 || y < 0 || y > height - 40) {
+        if (x < paddleLeft || x > paddleRight - paddleLeft || y > height || y < 40) {
             powerUpData.active = false;
             return;
         }
@@ -406,7 +426,7 @@ function game() {
 
     function activatePowerUp() {
         /* const power = powerUpData.types[Math.floor(Math.random() * powerUpData.types.length)]; */
-        const power = 'paddleSize';
+        const power = 'ballSpeed'; // For testing purposes
 
         switch (power) {
             case 'paddleSize':
@@ -432,8 +452,9 @@ function game() {
     function activePaddleSize(){
         const paddle = ballData.velX < 0 ? player2.paddle : player1.paddle;
         const paddleAffected = ballData.velX < 0 ? player1.paddle : player2.paddle;
-        paddle.style.height = "200px";
+        paddle.style.height = "160px";
         paddleAffected.style.height = "80px"
+        generalData.paddleMargin = height * 0.05;
 
         if (paddle.offsetTop < generalData.paddleMargin)
             paddle.style.top = `${generalData.paddleMargin}px`;
@@ -446,6 +467,8 @@ function game() {
             paddleAffected.style.top = `${height - generalData.paddleMargin - paddleAffected.clientHeight}px`;
 
         setTimeout(() => {
+            generalData.paddleMargin = height * 0.03;
+
             paddle.style.height = "120px";
             if (paddle.offsetTop < generalData.paddleMargin)
                 paddle.style.top = `${generalData.paddleMargin}px`;
@@ -464,9 +487,25 @@ function game() {
         ballData.velX *= 1.5;
         ballData.velY *= 1.5;
 
+        const trailInterval = setInterval(() => {
+            const trail = document.createElement("div");
+            trail.className = "ballTrailClone";
+    
+            const ballRect = ballData.ball.getBoundingClientRect();
+            const gameRect = document.getElementById("game").getBoundingClientRect();
+    
+            trail.style.left = `${ballData.ball.offsetLeft - ballData.velX}px`
+            trail.style.top = `${ballData.ball.offsetTop - ballData.velY}px`;
+    
+            document.getElementById("game").appendChild(trail);
+    
+            setTimeout(() => trail.remove(), 400);
+        }, 50);
+
         setTimeout(() => {
             ballData.velX /= 1.5;
             ballData.velY /= 1.5;
+            clearInterval(trailInterval);
         }, 5000);
     }
 
@@ -478,6 +517,7 @@ function game() {
             playerAffected.paddleSpeed = 0.04;
         }, 5000);
     }
+
     function activeReverseControl(){
         const playerAffected = ballData.velX < 0 ? player1 : player2;
         playerAffected.keysAffected = true;
