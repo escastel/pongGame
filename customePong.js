@@ -87,10 +87,84 @@ function game() {
         resetBall();
     }
 
+    function saveGameState() {
+        const gameState = {
+            player1: {
+                counter: player1.counter,
+                paddleTop: player1.paddle.offsetTop
+            },
+            player2: {
+                counter: player2.counter,
+                paddleTop: player2.paddle.offsetTop
+            },
+            ball: {
+                posX: ballData.ball.offsetLeft,
+                posY: ballData.ball.offsetTop,
+                velX: ballData.velX,
+                velY: ballData.velY,
+                angle: ballData.angle
+            },
+            powerUp: {
+                active: powerUpData.active,
+                type: powerUpData.type,
+                timeout: powerUpData.timeout
+            },
+            generalData: {
+                time: generalData.time,
+                speed: generalData.speed,
+                paddleSpeed: generalData.paddleSpeed
+            },
+            AIData: {
+                activate: AIData.activate,
+                targetY: AIData.targetY
+            }
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+    
+    function loadGameState() {
+        const savedState = localStorage.getItem('gameState');
+    
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+    
+            player1.counter = gameState.player1.counter;
+            player2.counter = gameState.player2.counter;
+    
+            player1.paddle.style.top = `${gameState.player1.paddleTop}px`;
+            player2.paddle.style.top = `${gameState.player2.paddleTop}px`;
+    
+            ballData.ball.style.left = `${gameState.ball.posX}px`;
+            ballData.ball.style.top = `${gameState.ball.posY}px`;
+            ballData.velX = gameState.ball.velX;
+            ballData.velY = gameState.ball.velY;
+            ballData.angle = gameState.ball.angle;
+
+            powerUpData.active = gameState.powerUp.active;
+            powerUpData.type = gameState.powerUp.type;
+            powerUpData.timeout = gameState.powerUp.timeout;
+    
+            generalData.time = gameState.generalData.time;
+            generalData.speed = gameState.generalData.speed;
+            generalData.paddleSpeed = gameState.generalData.paddleSpeed;
+    
+            AIData.activate = gameState.AIData.activate;
+            AIData.targetY = gameState.AIData.targetY;
+
+            document.getElementById('counter1').innerText = player1.counter;
+            document.getElementById('counter2').innerText = player2.counter;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadGameState();
+    });
+    
     /* Controlar en un futuro cuando se cambia de pestaña. */
 
     function play() {
         if (document.visibilityState !== "hidden"){
+            saveGameState();
             setOnresize();
             moveBall();
             movePaddle();
@@ -453,7 +527,7 @@ function game() {
         const paddle = ballData.velX < 0 ? player2.paddle : player1.paddle;
         const paddleAffected = ballData.velX < 0 ? player1.paddle : player2.paddle;
         paddle.classList.add('paddleGrowEffect');
-        paddleAffected.classList.add('paddleShrinkEffect');
+        paddleAffected.classList.add('paddleLittleEffect');
         generalData.paddleMargin = height * 0.05;
 
         if (paddle.offsetTop < generalData.paddleMargin)
@@ -470,18 +544,24 @@ function game() {
             generalData.paddleMargin = height * 0.03;
 
             paddle.classList.remove('paddleGrowEffect');
+            paddle.classList.add('paddleGrowToNormalEffect');
             if (paddle.offsetTop < generalData.paddleMargin)
                 paddle.style.top = `${generalData.paddleMargin}px`;
             else if (paddle.offsetTop + paddle.clientHeight > height - generalData.paddleMargin)
                 paddle.style.top = `${height - generalData.paddleMargin - paddle.clientHeight}px`;
 
             paddleAffected.style.height = "120px";
-            paddleAffected.classList.remove('paddleShrinkEffect');
+            paddleAffected.classList.remove('paddleLittleEffect');
+            paddleAffected.classList.add('paddleLittleToNormalEffect');
             if (paddleAffected.offsetTop < generalData.paddleMargin)
                 paddleAffected.style.top = `${generalData.paddleMargin}px`;
             else if (paddleAffected.offsetTop + paddleAffected.clientHeight > height - generalData.paddleMargin)
                 paddleAffected.style.top = `${height - generalData.paddleMargin - paddleAffected.clientHeight}px`;
         }, 5000);
+        setTimeout(() => {
+            paddle.classList.remove('paddleGrowToNormalEffect');
+            paddleAffected.classList.remove('paddleLittleToNormalEffect');
+        }, 1500);
     }
 
     function activeBallSpeed(){
