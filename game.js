@@ -29,7 +29,8 @@ function game() {
         speed: 0.02,
         paddleSpeed: 0.04,
         paddleMargin: height * 0.03,
-        controlGame: null
+        controlGame: null,
+        isPaused: false
     };
 
     const paddleCollisionData = {
@@ -62,7 +63,49 @@ function game() {
         newSpeed: 0
     };
 
-    function start() {
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function showCountdown() {
+        const countdownElement = document.getElementById('countdown');
+        if (!countdownElement) {
+            console.error("Elemento 'countdown' no encontrado en el HTML");
+            return Promise.resolve();
+        }
+        countdownElement.classList.remove('hidden');
+        ballData.ball.style.display = 'none';
+        
+        for (let i = 3; i > 0; i--) {
+            countdownElement.textContent = i.toString();
+            countdownElement.style.animation = 'countdownPulse 1s ease-in-out';
+            await delay(1000);
+            void countdownElement.offsetWidth;
+        }
+        
+        countdownElement.textContent = '¡GO!';
+        await delay(500);
+        countdownElement.style.animation = 'fadeOut 0.5s';
+        await delay(500);
+        countdownElement.classList.add('hidden');
+        ballData.ball.style.display = 'block';
+        
+        return Promise.resolve();
+    }
+
+    function togglePause() {
+        generalData.isPaused = !generalData.isPaused;
+    
+        if (generalData.isPaused) {
+            pauseMessage.style.display = 'block';
+        } else {
+            if (pauseMessage)
+                pauseMessage.style.display = 'none';
+        }
+    }
+
+    async function start() {
+        await showCountdown()
         init();
         generalData.controlGame = setInterval(play, generalData.time);
         if (AIData.activate)
@@ -73,7 +116,8 @@ function game() {
         resetBall();
     }
 
-    function play() {
+    async function play() {
+        if (generalData.isPaused) return;
         moveBall();
         movePaddle();
         checkLost();
@@ -224,6 +268,14 @@ function game() {
 
     document.onkeydown = function (e) {
         const key = e.key.toLowerCase();
+         // Tecla de pausa
+        if (key === "p") {
+            togglePause();
+            return;
+        }
+        
+        // Si el juego está pausado, no procesar más teclas
+        if (generalData.isPaused) return;
         if (key === "w") {
             player1.keyPress = true;
             player1.keyCode = "up";
